@@ -1,13 +1,19 @@
 <?php
 session_start();
 
-$conn = mysqli_connect("localhost", "root", "", "realestate_db");
+$db_host = getenv('DB_HOST') ?: "localhost";
+$db_user = getenv('DB_USER') ?: "root";
+$db_pass = getenv('DB_PASS') ?: "";
+$db_name = getenv('DB_NAME') ?: "realestate_db";
+
+$conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
 
 if (!$conn) {
     die("Database connection failed: " . mysqli_connect_error());
 }
 
-define("BASE_URL", "http://localhost/realestate/");
+$base_url = getenv('BASE_URL') ?: "http://localhost/realestate/";
+define("BASE_URL", $base_url);
 define("UPLOAD_DIR", "uploads/");
 
 define("TWILIO_SID", "YOUR_TWILIO_SID");
