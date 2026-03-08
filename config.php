@@ -1,15 +1,24 @@
 <?php
 session_start();
 
-$db_host = getenv('DB_HOST') ?: "localhost";
-$db_user = getenv('DB_USER') ?: "root";
-$db_pass = getenv('DB_PASS') ?: "";
-$db_name = getenv('DB_NAME') ?: "realestate_db";
+$db_host = getenv('DB_HOST') ?: (isset($_ENV['DB_HOST']) ? $_ENV['DB_HOST'] : "localhost");
+$db_user = getenv('DB_USER') ?: (isset($_ENV['DB_USER']) ? $_ENV['DB_USER'] : "root");
+$db_pass = getenv('DB_PASS') ?: (isset($_ENV['DB_PASS']) ? $_ENV['DB_PASS'] : "");
+$db_name = getenv('DB_NAME') ?: (isset($_ENV['DB_NAME']) ? $_ENV['DB_NAME'] : "realestate_db");
+$db_port = getenv('DB_PORT') ?: (isset($_ENV['DB_PORT']) ? $_ENV['DB_PORT'] : 3306);
 
-$conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name);
+// Extract port from host if provided in host:port format
+if (strpos($db_host, ':') !== false) {
+    list($db_host, $db_port) = explode(':', $db_host);
+}
 
-if (!$conn) {
-    die("Database connection failed: " . mysqli_connect_error());
+try {
+    $conn = mysqli_connect($db_host, $db_user, $db_pass, $db_name, (int)$db_port);
+    if (!$conn) {
+        throw new Exception(mysqli_connect_error());
+    }
+} catch (Exception $e) {
+    die("Database connection failed. Please ensure your database environment variables (DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT) are set correctly in the Render Dashboard.<br><br><b>Host Attempted:</b> " . htmlspecialchars($db_host) . "<br><b>Error:</b> " . $e->getMessage());
 }
 
 $base_url = getenv('BASE_URL') ?: "http://localhost/realestate/";
